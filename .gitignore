@@ -1,0 +1,47 @@
+# ---------------------------------------------------------------------------
+# Xcode / Swift
+# ---------------------------------------------------------------------------
+
+# Build products
+build/
+DerivedData/
+*.o
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Xcode user-specific files
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+
+# Xcode workspace shared data that should not be committed
+*.xcworkspace/xcuserdata/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.pinned
+
+# Resolved packages live inside the .xcodeproj; keep Package.resolved so
+# dependency versions are reproducible, but ignore SPM caches.
+*/SourcePackages/
+
+# ---------------------------------------------------------------------------
+# macOS
+# ---------------------------------------------------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# ---------------------------------------------------------------------------
+# Editors / tooling
+# ---------------------------------------------------------------------------
+.vscode/
+*.swp
+*~
