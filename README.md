@@ -456,8 +456,8 @@ It documents the architecture, control-input fan-in, persistence model, known is
 
 ## License
 
-Proprietary - All rights reserved.
+Released under the [MIT License](LICENSE) — free to use, modify, and distribute
+with no restrictions.
 
-Copyright © 2026 Marco Tempest / Newmagic. This software is provided for the
-WEF 2026 production and is not licensed for redistribution. Third-party
-dependencies (OSCKit, CocoaAsyncSocket, SwiftASCII) retain their own MIT licenses.
+Copyright © 2026 Marco Tempest - MagicLab. Third-party dependencies (OSCKit,
+CocoaAsyncSocket, SwiftASCII) retain their own licenses.

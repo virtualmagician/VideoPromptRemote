@@ -174,4 +174,7 @@ If your iPhone gets a new IP address (e.g., after reconnecting to WiFi):
 
 ## License
 
-Proprietary - All rights reserved.
+Released under the MIT License — free to use, modify, and distribute with no
+restrictions. See the [LICENSE](../LICENSE) file at the repository root.
+
+Copyright © 2026 Marco Tempest - MagicLab.
