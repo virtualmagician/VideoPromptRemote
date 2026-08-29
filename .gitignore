@@ -26,6 +26,9 @@ xcuserdata/
 .swiftpm/
 Package.pinned
 
+# Build logs
+*.log
+
 # Resolved packages live inside the .xcodeproj; keep Package.resolved so
 # dependency versions are reproducible, but ignore SPM caches.
 */SourcePackages/

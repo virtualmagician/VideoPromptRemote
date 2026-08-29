@@ -4,7 +4,7 @@
 > **Goal of this doc:** give you everything you need to be productive in ~10 minutes,
 > without re-reading the whole codebase. Read this before making changes.
 
-Last updated: 2026-06-09
+Last updated: 2026-08-29
 
 ---
 
@@ -144,10 +144,48 @@ xcodebuild -project VideoPromptRemote.xcodeproj -scheme VideoPromptOSC \
 1. Open `VideoPromptDesktop/VideoPromptDesktop.xcodeproj`, `Cmd+R`.
 2. Open Settings (gear) and enter the iPhone's WiFi IP. Port `9000`.
 
+### Deploy to a physical device from the command line (verified working)
+
+This is how the app has actually been deployed to devices (iPad Pro M5 and iPhone 17 Pro).
+`devicectl` is the modern replacement for `ios-deploy`.
+
+```bash
+# 1. Find the device UDID
+xcrun devicectl list devices
+
+# 2. Build for that device (Debug), into a LOCAL DerivedData path inside the repo
+xcodebuild -project VideoPromptRemote.xcodeproj -scheme VideoPromptOSC \
+  -configuration Debug -destination 'id=<DEVICE_UDID>' \
+  -derivedDataPath build/DerivedData -allowProvisioningUpdates build
+
+# 3. Install + launch
+APP=build/DerivedData/Build/Products/Debug-iphoneos/VideoPromptOSC.app
+xcrun devicectl device install app --device <DEVICE_UDID> "$APP"
+xcrun devicectl device process launch --device <DEVICE_UDID> com.videoprompt.osc
+```
+
+**Deployment gotchas (learned the hard way):**
+- **Active developer dir may be Command Line Tools, not Xcode.** If `xcrun devicectl`
+  reports "unable to find utility devicectl", the active dir is
+  `/Library/Developer/CommandLineTools`. Either run `sudo xcode-select -s
+  /Applications/Xcode.app/Contents/Developer`, or prefix commands with
+  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` (and call `devicectl` by
+  full path: `/Applications/Xcode.app/Contents/Developer/usr/bin/devicectl`).
+- **The repo lives in Dropbox/CloudStorage reachable via a symlink**
+  (`~/Newmagic Dropbox/...` → `~/Library/CloudStorage/Dropbox-Newmagic/...`). Building
+  through the symlink path while stale DerivedData exists from the *real* path causes
+  **`CodeSign` failures** with "Stale file … located outside of the allowed root paths"
+  warnings. Fix: `rm -rf build/DerivedData` and rebuild from the **canonical
+  CloudStorage path**. Prefer always building from the canonical path.
+- Signing is **Automatic**, team `Z3U3NKMU2Y`. `-allowProvisioningUpdates` lets
+  xcodebuild create/refresh the "iOS Team Provisioning Profile" automatically.
+- Simulator services can fail under sandboxing; device work needs full system access.
+
 ### Key project facts (verified)
 - iOS deployment target: **18.0** (`IPHONEOS_DEPLOYMENT_TARGET`).
 - macOS deployment target: **13.0**.
 - Bundle IDs: `com.videoprompt.osc` (iOS), `com.videoprompt.desktop` (macOS).
+- Signing: Automatic, DEVELOPMENT_TEAM `Z3U3NKMU2Y`.
 - `MARKETING_VERSION = 1.0` in the iOS project (note: README "version history" tracks
   *feature* milestones up to 3.0; the Xcode marketing version has not been bumped to match).
 
@@ -176,16 +214,36 @@ xcodebuild -project VideoPromptRemote.xcodeproj -scheme VideoPromptOSC \
 
 4. **Tests are minimal.** `VideoPromptTests` covers little. No CI is configured.
 
-5. **Not a git repository yet at the time of writing.** The release prep added
-   `.gitignore`, `LICENSE`, and this file, but `git init` / first commit had not been
-   run. Make sure `DerivedData/` and `build/` are NOT committed (they're gitignored).
-
-6. **Hardware-dependent features** (Bluetooth volume-button remote, camera remote, real
+5. **Hardware-dependent features** (Bluetooth volume-button remote, camera remote, real
    OSC over WiFi) cannot be fully validated in the simulator — test on a device.
 
 ---
 
-## 6. Suggested next steps (roadmap)
+## 6. Git, GitHub & licensing (current state)
+
+- **Git repo:** initialized. Default branch `main`.
+- **Remote:** [`virtualmagician/VideoPromptRemote`](https://github.com/virtualmagician/VideoPromptRemote)
+  (`origin`, plain HTTPS URL — no credentials stored in `.git/config`).
+- **License:** **MIT** (`LICENSE`), © 2026 Marco Tempest - MagicLab. Fully open source,
+  no restrictions. (Was proprietary during initial release prep; relicensed.)
+- **`.gitignore`** excludes `build/`, `DerivedData/`, SPM caches, Xcode user state,
+  and `.DS_Store`. `Package.resolved` IS tracked (reproducible dependency versions).
+- **Cursor co-author suppression:** a local `.git/hooks/commit-msg` hook strips the
+  auto-injected `Co-authored-by: Cursor <cursoragent@cursor.com>` trailer so Cursor
+  never shows up as a GitHub contributor. **This hook is local only** (hooks aren't
+  pushed). If you clone fresh or add collaborators and want it enforced, move it to a
+  tracked dir and set `git config core.hooksPath .githooks`. History was already
+  rewritten + force-pushed once to remove the trailer from the initial commits.
+- **Auth for pushing:** no credential helper is configured. Use `gh auth login` or the
+  macOS keychain (`git config --global credential.helper osxkeychain`). Do NOT paste
+  personal access tokens into chat/agent prompts.
+- **Committer identity note:** early commits were auto-attributed to
+  `Marco Tempest <marcotempest@magiclabm5mmbp.home>` (local hostname email). Set a real
+  `git config --global user.email` before making more commits.
+
+---
+
+## 7. Suggested next steps (roadmap)
 
 Ordered roughly by value-to-effort for a release:
 
@@ -203,7 +261,7 @@ Ordered roughly by value-to-effort for a release:
 
 ---
 
-## 7. Conventions
+## 8. Conventions
 
 - **SwiftUI-first.** Prefer SwiftUI; only drop to UIKit/AppKit when wrapping `AVPlayerLayer`
   or system features that have no SwiftUI equivalent.
@@ -216,7 +274,7 @@ Ordered roughly by value-to-effort for a release:
 
 ---
 
-## 8. Where to start reading code
+## 9. Where to start reading code
 
 1. `VideoPrompt/ContentView.swift` — see how everything is wired together.
 2. `VideoPrompt/ViewModels/VideoPlayerViewModel.swift` — the playback/playlist logic.
